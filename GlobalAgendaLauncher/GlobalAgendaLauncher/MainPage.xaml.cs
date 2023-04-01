@@ -14,6 +14,8 @@ public partial class MainPage : ContentPage
 	/// </summary>
 	public const string SECURE_STORAGE_LOGIN_PASSWORD_KEY = "password";
 
+	public const string SECURE_STORAGE_GLOBAL_AGENDA_BINARY_LOCATION = "global_agenda_binary_location";
+
     public MainPage()
 	{
 		InitializeComponent();
@@ -40,6 +42,13 @@ public partial class MainPage : ContentPage
 		if (storedPassword is not null)
 		{
 			Password.Text = storedPassword;
+		}
+
+		// Get remembered Global Agenda binary location
+		var storedGlobalAgendaBinaryLocation = await SecureStorage.Default.GetAsync(SECURE_STORAGE_GLOBAL_AGENDA_BINARY_LOCATION);
+		if (storedGlobalAgendaBinaryLocation is not null)
+		{
+			GlobalAgendaBinaryLocation.Text = storedGlobalAgendaBinaryLocation;
 		}
     }
 
@@ -86,6 +95,23 @@ public partial class MainPage : ContentPage
     private void SavePasswordCheckBoxLabel_Tapped(object sender, TappedEventArgs e)
     {
 		SavePassword.IsChecked = !SavePassword.IsChecked;
+    }
+
+    private async void SelectGobalAgendaBinaryLocation_Clicked(object sender, EventArgs e)
+    {
+		PickOptions pickOpts = new()
+		{
+			PickerTitle = "Select your Global Agenda Binary",
+			FileTypes = new FilePickerFileType(
+                new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.WinUI, new[] { ".exe" } }, // file extension
+                }),
+    };
+		var file = await FilePicker.Default.PickAsync(pickOpts);
+		GlobalAgendaBinaryLocation.Text = file.FullPath;
+
+		await SecureStorage.Default.SetAsync(SECURE_STORAGE_GLOBAL_AGENDA_BINARY_LOCATION, file.FullPath);
     }
 }
 

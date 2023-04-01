@@ -11,55 +11,73 @@
             >
 
             <VerticalStackLayout>
-            <Label
-                Text="Global Agenda Login"
-                SemanticProperties.HeadingLevel="Level1"
-                FontSize="Small"
-                />
-
-            <VerticalStackLayout
-                Padding="0,10,0,0"
-                >
                 <Label
-                     Text="Hi-Rez Username"
-                     />
-                <Entry
-                    x:Name="Username"
-                    Placeholder="Username"
+                    Text="Global Agenda Location"
+                    FontSize="Small"
                     />
+                <HorizontalStackLayout Padding="0,10,0,0">
+                    <Entry
+                        x:Name="GlobalAgendaBinaryLocation"
+                        Placeholder="C:\...\GlobalAgenda.exe"
+                        />
+                    <Button
+                        x:Name="SelectGobalAgendaBinaryLocation"
+                        Text="..."
+                        Clicked="SelectGobalAgendaBinaryLocation_Clicked"
+                        />
+                </HorizontalStackLayout>
             </VerticalStackLayout>
 
-            <VerticalStackLayout
-                Padding="0,10,0,0"
-                >
+            <VerticalStackLayout>
                 <Label
-                    Text="Password"
+                    Text="Global Agenda Login"
+                    SemanticProperties.HeadingLevel="Level1"
+                    FontSize="Small"
                     />
-                <Entry
-                    x:Name="Password"
-                    Placeholder="Hi-Rez Password"
-                    IsPassword="True"
-                    />
-            </VerticalStackLayout>
 
-            <HorizontalStackLayout>
-                <CheckBox x:Name="SavePassword" />
-                <Label
-                    Text="Save Password"
-                    VerticalOptions="Center"
+                <VerticalStackLayout
+                    Padding="0,10,0,0"
                     >
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="SavePasswordCheckBoxLabel_Tapped" />
-                    </Label.GestureRecognizers>
-                </Label>
-            </HorizontalStackLayout>
+                    <Label
+                         Text="Hi-Rez Username"
+                         />
+                    <Entry
+                        x:Name="Username"
+                        Placeholder="Username"
+                        />
+                </VerticalStackLayout>
 
-            <Button
-                x:Name="LaunchBtn"
-                Text="Launch"
-                SemanticProperties.Hint="Starts Global Agenda"
-                Clicked="OnLaunchClicked"
-                HorizontalOptions="Start" />
+                <VerticalStackLayout
+                    Padding="0,10,0,0"
+                    >
+                    <Label
+                        Text="Password"
+                        />
+                    <Entry
+                        x:Name="Password"
+                        Placeholder="Hi-Rez Password"
+                        IsPassword="True"
+                        />
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout>
+                    <CheckBox x:Name="SavePassword" />
+                    <Label
+                        Text="Save Password"
+                        VerticalOptions="Center"
+                        >
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="SavePasswordCheckBoxLabel_Tapped" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </HorizontalStackLayout>
+
+                <Button
+                    x:Name="LaunchBtn"
+                    Text="Launch"
+                    SemanticProperties.Hint="Starts Global Agenda"
+                    Clicked="OnLaunchClicked"
+                    HorizontalOptions="Start" />
             </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
