@@ -9,6 +9,8 @@
             Padding="30,0"
             VerticalOptions="Center">
 
+            <Entry />
+
             <Image
                 Source="dotnet_bot.png"
                 SemanticProperties.Description="Cute dot net bot waving hi to you!"
@@ -29,10 +31,10 @@
                 HorizontalOptions="Center" />
 
             <Button
-                x:Name="CounterBtn"
-                Text="Click me"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
+                x:Name="LaunchBtn"
+                Text="Launch"
+                SemanticProperties.Hint="Starts Global Agenda"
+                Clicked="OnLaunchClicked"
                 HorizontalOptions="Center" />
 
         </VerticalStackLayout>
