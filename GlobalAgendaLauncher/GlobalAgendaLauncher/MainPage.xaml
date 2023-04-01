@@ -7,36 +7,60 @@
         <VerticalStackLayout
             Spacing="25"
             Padding="30,0"
-            VerticalOptions="Center">
+            VerticalOptions="Center"
+            >
 
-            <Entry />
-
-            <Image
-                Source="dotnet_bot.png"
-                SemanticProperties.Description="Cute dot net bot waving hi to you!"
-                HeightRequest="200"
-                HorizontalOptions="Center" />
-
+            <VerticalStackLayout>
             <Label
-                Text="Hello, World!"
+                Text="Global Agenda Login"
                 SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"
-                HorizontalOptions="Center" />
+                FontSize="Small"
+                />
 
-            <Label
-                Text="Welcome to .NET Multi-platform App UI"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I"
-                FontSize="18"
-                HorizontalOptions="Center" />
+            <VerticalStackLayout
+                Padding="0,10,0,0"
+                >
+                <Label
+                     Text="Hi-Rez Username"
+                     />
+                <Entry
+                    x:Name="Username"
+                    Placeholder="Username"
+                    />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout
+                Padding="0,10,0,0"
+                >
+                <Label
+                    Text="Password"
+                    />
+                <Entry
+                    x:Name="Password"
+                    Placeholder="Hi-Rez Password"
+                    IsPassword="True"
+                    />
+            </VerticalStackLayout>
+
+            <HorizontalStackLayout>
+                <CheckBox x:Name="SavePassword" />
+                <Label
+                    Text="Save Password"
+                    VerticalOptions="Center"
+                    >
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="SavePasswordCheckBoxLabel_Tapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
 
             <Button
                 x:Name="LaunchBtn"
                 Text="Launch"
                 SemanticProperties.Hint="Starts Global Agenda"
                 Clicked="OnLaunchClicked"
-                HorizontalOptions="Center" />
-
+                HorizontalOptions="Start" />
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 
