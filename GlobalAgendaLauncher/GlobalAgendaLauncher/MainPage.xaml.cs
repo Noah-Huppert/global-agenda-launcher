@@ -5,16 +5,19 @@ namespace GlobalAgendaLauncher;
 public partial class MainPage : ContentPage
 {
 	/// <summary>
-	/// The key in secure storage in which the user's login username will be stored.
+	/// The key in preference storage in which the user's login username will be stored.
 	/// </summary>
-    public const string SECURE_STORAGE_LOGIN_USERNAME_KEY = "username";
+    public const string PREFERENCES_LOGIN_USERNAME_KEY = "username";
 
 	/// <summary>
 	/// The key in secure storage in which the user's login password will be stored.
 	/// </summary>
 	public const string SECURE_STORAGE_LOGIN_PASSWORD_KEY = "password";
 
-	public const string SECURE_STORAGE_GLOBAL_AGENDA_BINARY_LOCATION = "global_agenda_binary_location";
+	/// <summary>
+	/// The key in preference storage where the Global Agenda binary will be stored.
+	/// </summary>
+	public const string PREFERENCES_GLOBAL_AGENDA_BINARY_LOCATION = "global_agenda_binary_location";
 
     public MainPage()
 	{
@@ -31,7 +34,7 @@ public partial class MainPage : ContentPage
 	private async void OnLoaded(object? sender, EventArgs e)
 	{
         // Get remembered login values
-        var storedUsername = await SecureStorage.Default.GetAsync(SECURE_STORAGE_LOGIN_USERNAME_KEY);
+        var storedUsername = Preferences.Default.Get<string?>(PREFERENCES_LOGIN_USERNAME_KEY, null);
 		var storedPassword = await SecureStorage.Default.GetAsync(SECURE_STORAGE_LOGIN_PASSWORD_KEY);
 
 		if (storedUsername is not null)
@@ -45,7 +48,7 @@ public partial class MainPage : ContentPage
 		}
 
 		// Get remembered Global Agenda binary location
-		var storedGlobalAgendaBinaryLocation = await SecureStorage.Default.GetAsync(SECURE_STORAGE_GLOBAL_AGENDA_BINARY_LOCATION);
+		var storedGlobalAgendaBinaryLocation = Preferences.Default.Get<string?>(PREFERENCES_GLOBAL_AGENDA_BINARY_LOCATION, null);
 		if (storedGlobalAgendaBinaryLocation is not null)
 		{
 			GlobalAgendaBinaryLocation.Text = storedGlobalAgendaBinaryLocation;
@@ -79,7 +82,7 @@ public partial class MainPage : ContentPage
 		}
 
 		// Save login form values
-		await SecureStorage.Default.SetAsync(SECURE_STORAGE_LOGIN_USERNAME_KEY, Username.Text);
+		Preferences.Default.Set(PREFERENCES_LOGIN_USERNAME_KEY, Username.Text);
 
 		if (SavePassword.IsChecked)
 		{
@@ -109,9 +112,13 @@ public partial class MainPage : ContentPage
                 }),
     };
 		var file = await FilePicker.Default.PickAsync(pickOpts);
+		if (file is null) {
+			// File picker canceled
+			return;
+		}
 		GlobalAgendaBinaryLocation.Text = file.FullPath;
 
-		await SecureStorage.Default.SetAsync(SECURE_STORAGE_GLOBAL_AGENDA_BINARY_LOCATION, file.FullPath);
+		Preferences.Default.Set(PREFERENCES_GLOBAL_AGENDA_BINARY_LOCATION, file.FullPath);
     }
 }
 
