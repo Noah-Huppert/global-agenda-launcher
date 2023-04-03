@@ -4,83 +4,105 @@
              x:Class="GlobalAgendaLauncher.MainPage">
 
     <ScrollView>
-        <HorizontalStackLayout>
-            <VerticalStackLayout
-                Spacing="25"
-                Padding="30,0"
-                VerticalOptions="Center"
+        <VerticalStackLayout>
+            <HorizontalStackLayout
+                BackgroundColor="{DynamicResource Primary}"
+                Margin="0,0,0,10"
                 >
-                <VerticalStackLayout>
-                    <Label
-                        Text="Global Agenda Location"
-                        FontSize="Small"
-                        />
-                    <HorizontalStackLayout Padding="0,10,0,0">
-                        <Entry
-                            x:Name="GlobalAgendaBinaryLocation"
-                            Placeholder="C:\...\GlobalAgenda.exe"
+                <Label
+                    Text="Global Agenda Launcher"
+                    FontSize="Large"
+                    TextColor="White"
+                    Padding="10,0,0,0"
+                    />
+                <Label
+                    Text="Community Project"
+                    TextColor="White"
+                    VerticalTextAlignment="End"
+                    Padding="15,0,0,4"
+                    />
+            </HorizontalStackLayout>
+            
+            <HorizontalStackLayout
+                    Spacing="25"
+                    Padding="30,0"
+                >
+                <VerticalStackLayout
+                    VerticalOptions="End">
+                    <VerticalStackLayout>
+                        <Label
+                            Text="Global Agenda Location"
+                            FontSize="Small"
                             />
-                        <Button
-                            x:Name="SelectGobalAgendaBinaryLocation"
-                            Text="..."
-                            Clicked="SelectGobalAgendaBinaryLocation_Clicked"
-                            />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
+                        <HorizontalStackLayout Padding="0,10,0,0">
+                            <Entry
+                                x:Name="GlobalAgendaBinaryLocation"
+                                Placeholder="C:\...\GlobalAgenda.exe"
+                                />
+                            <Button
+                                x:Name="SelectGobalAgendaBinaryLocation"
+                                Text="..."
+                                Clicked="SelectGobalAgendaBinaryLocation_Clicked"
+                                />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
 
-                <VerticalStackLayout>
-                    <Label
-                        Text="Global Agenda Login"
-                        SemanticProperties.HeadingLevel="Level1"
-                        FontSize="Small"
-                        />
-
-                    <VerticalStackLayout
+                    <VerticalStackLayout    
                         Padding="0,10,0,0"
                         >
                         <Label
-                             Text="Hi-Rez Username"
-                             />
-                        <Entry
-                            x:Name="Username"
-                            Placeholder="Username"
+                            Text="Global Agenda Login"
+                            SemanticProperties.HeadingLevel="Level1"
+                            FontSize="Small"
                             />
-                    </VerticalStackLayout>
 
-                    <VerticalStackLayout
-                        Padding="0,10,0,0"
-                        >
-                        <Label
-                            Text="Password"
-                            />
-                        <Entry
-                            x:Name="Password"
-                            Placeholder="Hi-Rez Password"
-                            IsPassword="True"
-                            />
-                    </VerticalStackLayout>
-
-                    <HorizontalStackLayout>
-                        <CheckBox x:Name="SavePassword" />
-                        <Label
-                            Text="Save Password"
-                            VerticalOptions="Center"
+                        <VerticalStackLayout
+                            Padding="0,10,0,0"
                             >
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="SavePasswordCheckBoxLabel_Tapped" />
-                            </Label.GestureRecognizers>
-                        </Label>
-                    </HorizontalStackLayout>
+                            <Label
+                                 Text="Username"
+                                 />
+                            <Entry
+                                x:Name="Username"
+                                Placeholder="Username"
+                                />
+                        </VerticalStackLayout>
 
-                    <Button
-                        x:Name="LaunchBtn"
-                        Text="Launch"
-                        SemanticProperties.Hint="Starts Global Agenda"
-                        Clicked="OnLaunchClicked"
-                        HorizontalOptions="Start" />
+                        <VerticalStackLayout
+                            Padding="0,10,0,0"
+                            >
+                            <Label
+                                Text="Password"
+                                />
+                            <Entry
+                                x:Name="Password"
+                                Placeholder="Hi-Rez Password"
+                                IsPassword="True"
+                                />
+                        </VerticalStackLayout>
+
+                        <HorizontalStackLayout>
+                            <CheckBox x:Name="SavePassword" />
+                            <Label
+                                Text="Save Password"
+                                VerticalOptions="Center"
+                                >
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="SavePasswordCheckBoxLabel_Tapped" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+
+                        <Button
+                            x:Name="LaunchBtn"
+                            Text="Launch"
+                            SemanticProperties.Hint="Starts Global Agenda"
+                            Clicked="OnLaunchClicked"
+                            HorizontalOptions="Start" />
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-            </VerticalStackLayout>
-        </HorizontalStackLayout>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
     </ScrollView>
 
 </ContentPage>
