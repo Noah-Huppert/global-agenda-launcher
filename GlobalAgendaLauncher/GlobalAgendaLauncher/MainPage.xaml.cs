@@ -33,6 +33,7 @@ public partial class MainPage : ContentPage
 		if (storedPassword is not null)
 		{
 			Password.Text = storedPassword;
+			SavePassword.IsChecked = true;
 		}
 
 		// Get remembered Global Agenda binary location
@@ -77,12 +78,15 @@ public partial class MainPage : ContentPage
 
 		// Save login form values
 		AppSettings.Instance.Username.Value = Username.Text;
-		await AppSettings.Instance.Username.SaveValue();
+		await AppSettings.Instance.Username.Save();
 
 		if (SavePassword.IsChecked)
 		{
 			AppSettings.Instance.Password.Value = Password.Text;
-			await AppSettings.Instance.Password.SaveValue();
+			await AppSettings.Instance.Password.Save();
+		} else
+		{
+			AppSettings.Instance.Password.Clear();
 		}
 	}
 
@@ -120,7 +124,7 @@ public partial class MainPage : ContentPage
 		GlobalAgendaBinaryLocation.Text = file.FullPath;
 
 		AppSettings.Instance.GABinaryPath.Value = file.FullPath;
-		await AppSettings.Instance.GABinaryPath.SaveValue();
+		await AppSettings.Instance.GABinaryPath.Save();
     }
 }
 

@@ -147,7 +147,7 @@ namespace GlobalAgendaLauncher.Controllers
         /// <summary>
         /// Save value to store.
         /// </summary>
-        public async Task SaveValue()
+        public async Task Save()
         {
             if (secret)
             {
@@ -155,6 +155,16 @@ namespace GlobalAgendaLauncher.Controllers
             } else
             {
                 Preferences.Default.Set(name, Value);
+            }
+        }
+
+        public void Clear()
+        {
+            if (secret)
+            {
+                SecureStorage.Default.Remove(Name);
+            } else {
+                Preferences.Default.Remove(Name); 
             }
         }
     }
