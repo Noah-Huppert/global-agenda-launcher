@@ -1,24 +1,10 @@
-﻿using System.Diagnostics;
+﻿using GlobalAgendaLauncher.Controllers;
+using System.Diagnostics;
 
 namespace GlobalAgendaLauncher;
 
 public partial class MainPage : ContentPage
 {
-	/// <summary>
-	/// The key in preference storage in which the user's login username will be stored.
-	/// </summary>
-    public const string PREFERENCES_LOGIN_USERNAME_KEY = "username";
-
-	/// <summary>
-	/// The key in secure storage in which the user's login password will be stored.
-	/// </summary>
-	public const string SECURE_STORAGE_LOGIN_PASSWORD_KEY = "password";
-
-	/// <summary>
-	/// The key in preference storage where the Global Agenda binary will be stored.
-	/// </summary>
-	public const string PREFERENCES_GLOBAL_AGENDA_BINARY_LOCATION = "global_agenda_binary_location";
-
     public MainPage()
 	{
 		InitializeComponent();
@@ -33,9 +19,11 @@ public partial class MainPage : ContentPage
 	/// <param name="e"></param>
 	private async void OnLoaded(object? sender, EventArgs e)
 	{
-        // Get remembered login values
-        var storedUsername = Preferences.Default.Get<string?>(PREFERENCES_LOGIN_USERNAME_KEY, null);
-		var storedPassword = await SecureStorage.Default.GetAsync(SECURE_STORAGE_LOGIN_PASSWORD_KEY);
+		await AppSettings.Instance.Load();
+
+		// Get remembered login values
+		var storedUsername = await AppSettings.Instance.Username.GetValue();
+		var storedPassword = await AppSettings.Instance.Password.GetValue();
 
 		if (storedUsername is not null)
 		{
@@ -48,7 +36,7 @@ public partial class MainPage : ContentPage
 		}
 
 		// Get remembered Global Agenda binary location
-		var storedGlobalAgendaBinaryLocation = Preferences.Default.Get<string?>(PREFERENCES_GLOBAL_AGENDA_BINARY_LOCATION, null);
+		var storedGlobalAgendaBinaryLocation = await AppSettings.Instance.GABinaryPath.GetValue();
 		if (storedGlobalAgendaBinaryLocation is not null)
 		{
 			GlobalAgendaBinaryLocation.Text = storedGlobalAgendaBinaryLocation;
@@ -82,11 +70,13 @@ public partial class MainPage : ContentPage
 		}
 
 		// Save login form values
-		Preferences.Default.Set(PREFERENCES_LOGIN_USERNAME_KEY, Username.Text);
+		AppSettings.Instance.Username.Value = Username.Text;
+		await AppSettings.Instance.Username.SaveValue();
 
 		if (SavePassword.IsChecked)
 		{
-			await SecureStorage.Default.SetAsync(SECURE_STORAGE_LOGIN_PASSWORD_KEY, Password.Text);
+			AppSettings.Instance.Password.Value = Password.Text;
+			await AppSettings.Instance.Password.SaveValue();
 		}
 	}
 
@@ -100,6 +90,11 @@ public partial class MainPage : ContentPage
 		SavePassword.IsChecked = !SavePassword.IsChecked;
     }
 
+	/// <summary>
+	/// Run when the select file button is clicked next to the GA binary path input.
+	/// </summary>
+	/// <param name="sender"></param>
+	/// <param name="e"></param>
     private async void SelectGobalAgendaBinaryLocation_Clicked(object sender, EventArgs e)
     {
 		PickOptions pickOpts = new()
@@ -118,7 +113,8 @@ public partial class MainPage : ContentPage
 		}
 		GlobalAgendaBinaryLocation.Text = file.FullPath;
 
-		Preferences.Default.Set(PREFERENCES_GLOBAL_AGENDA_BINARY_LOCATION, file.FullPath);
+		AppSettings.Instance.GABinaryPath.Value = file.FullPath;
+		await AppSettings.Instance.GABinaryPath.SaveValue();
     }
 }
 
