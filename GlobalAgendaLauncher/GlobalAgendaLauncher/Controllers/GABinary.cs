@@ -16,33 +16,32 @@ namespace GlobalAgendaLauncher.Controllers
         /// <summary>
         /// The location of the game binary.
         /// </summary>
-        private string? path;
+        private string path;
 
         /// <summary>
         /// Initialize.
         /// </summary>
         /// <param name="path"></param>
-        GABinary(string? path)
+        GABinary(string path)
         {
             this.path = path;
         }
 
         /// <summary>
-        /// Try to find the GA binary based on already known locations and set the path property.
+        /// Try to find the GA binary based on already known locations.
         /// </summary>
         /// <returns>
-        /// True if the binary was found and recorded, false if not.
+        /// Path of GA binary if the guessed path exists, null if the path guesses didn't find the binary.
         /// </returns>
-        public bool GuessPath()
+        public static string? GuessPath()
         {
             // Check if the GA binary is in any known locations
             if (File.Exists(GLOBAL_AGENDA_BINARY_STEAM_PATH))
             {
-                this.path = GLOBAL_AGENDA_BINARY_STEAM_PATH;
-                return true;
+                return GLOBAL_AGENDA_BINARY_STEAM_PATH;
             }
 
-            return false;
+            return null;
         }
     }
 }

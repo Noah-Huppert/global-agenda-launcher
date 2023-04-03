@@ -37,6 +37,12 @@ public partial class MainPage : ContentPage
 
 		// Get remembered Global Agenda binary location
 		var storedGlobalAgendaBinaryLocation = await AppSettings.Instance.GABinaryPath.GetValue();
+		if (storedGlobalAgendaBinaryLocation is null)
+		{
+			// Try to find GA binary if not specified
+			storedGlobalAgendaBinaryLocation = GABinary.GuessPath();
+		}
+
 		if (storedGlobalAgendaBinaryLocation is not null)
 		{
 			GlobalAgendaBinaryLocation.Text = storedGlobalAgendaBinaryLocation;
