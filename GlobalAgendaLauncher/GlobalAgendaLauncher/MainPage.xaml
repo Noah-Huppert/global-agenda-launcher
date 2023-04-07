@@ -5,6 +5,7 @@
 
     <ScrollView>
         <VerticalStackLayout>
+            <!-- Header -->
             <HorizontalStackLayout
                 BackgroundColor="{DynamicResource Primary}"
                 Margin="0,0,0,10"
@@ -23,30 +24,53 @@
                     />
             </HorizontalStackLayout>
             
+            <!-- Content -->
             <HorizontalStackLayout
                     Spacing="25"
                     Padding="30,0"
                 >
                 <VerticalStackLayout
                     VerticalOptions="End">
+                    <!-- Launch Options -->
                     <VerticalStackLayout>
                         <Label
-                            Text="Global Agenda Location"
+                            Text="Launch Configuration"
+                            SemanticProperties.HeadingLevel="Level1"
                             FontSize="Small"
                             />
-                        <HorizontalStackLayout Padding="0,10,0,0">
+
+                        <VerticalStackLayout
+                            Padding="0,10,0,0"
+                            >
+                            <Label
+                                Text="Global Agenda Location"
+                                />
+                            <HorizontalStackLayout Padding="0,10,0,0">
+                                <Entry
+                                    x:Name="GlobalAgendaBinaryLocation"
+                                    Placeholder="C:\...\GlobalAgenda.exe"
+                                    />
+                                <Button
+                                    x:Name="SelectGobalAgendaBinaryLocation"
+                                    Text="..."
+                                    Clicked="SelectGobalAgendaBinaryLocation_Clicked"
+                                    />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout
+                            Padding="0,10,0,0"
+                            >
+                            <Label
+                                Text="Launch Options"
+                                />
                             <Entry
-                                x:Name="GlobalAgendaBinaryLocation"
-                                Placeholder="C:\...\GlobalAgenda.exe"
+                                x:Name="LaunchOptions"
                                 />
-                            <Button
-                                x:Name="SelectGobalAgendaBinaryLocation"
-                                Text="..."
-                                Clicked="SelectGobalAgendaBinaryLocation_Clicked"
-                                />
-                        </HorizontalStackLayout>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
 
+                    <!-- Login Credentials -->
                     <VerticalStackLayout    
                         Padding="0,10,0,0"
                         >

@@ -19,6 +19,8 @@ public partial class MainPage : ContentPage
 	/// <param name="e"></param>
 	private async void OnLoaded(object? sender, EventArgs e)
 	{
+		Debug.Print("MainPage.OnLoaded");
+
 		await AppSettings.Instance.Load();
 
 		// Get remembered login values
@@ -42,11 +44,32 @@ public partial class MainPage : ContentPage
 		{
 			// Try to find GA binary if not specified
 			storedGlobalAgendaBinaryLocation = GABinary.GuessPath();
-		}
+
+			// Save found GA binary if found
+			if (storedGlobalAgendaBinaryLocation is not null)
+			{
+				await AppSettings.Instance.GABinaryPath.Save(storedGlobalAgendaBinaryLocation);
+			}
+
+        }
 
 		if (storedGlobalAgendaBinaryLocation is not null)
 		{
 			GlobalAgendaBinaryLocation.Text = storedGlobalAgendaBinaryLocation;
+			Debug.Print(storedGlobalAgendaBinaryLocation);
+		}
+
+		// Get stored GA launch options
+		var storedGALaunchOptions = await AppSettings.Instance.GALaunchOptions.GetValue();
+		if (storedGALaunchOptions is null)
+		{
+			storedGALaunchOptions = GABinary.DEFAULT_LAUNCH_OPTIONS;
+			await AppSettings.Instance.GALaunchOptions.Save(storedGALaunchOptions);
+		}
+
+		if (storedGALaunchOptions is not null)
+		{
+			LaunchOptions.Text = storedGALaunchOptions;
 		}
     }
 
@@ -70,6 +93,11 @@ public partial class MainPage : ContentPage
 			missingFields.Add("Password");
 		}
 
+		if (await AppSettings.Instance.GABinaryPath.GetValue() is null)
+		{
+			missingFields.Add("Global Agenda Binary");
+		}
+
 		if (missingFields.Count > 0)
 		{
 			await DisplayAlert("Missing Hi-Rez Login Information", String.Format("You must enter your: {0}", string.Join(", ", missingFields)), "Okay");
@@ -77,17 +105,21 @@ public partial class MainPage : ContentPage
 		}
 
 		// Save login form values
-		AppSettings.Instance.Username.Value = Username.Text;
-		await AppSettings.Instance.Username.Save();
+		await AppSettings.Instance.Username.Save(Username.Text);
 
 		if (SavePassword.IsChecked)
 		{
-			AppSettings.Instance.Password.Value = Password.Text;
-			await AppSettings.Instance.Password.Save();
+			await AppSettings.Instance.Password.Save(Password.Text);
 		} else
 		{
 			AppSettings.Instance.Password.Clear();
 		}
+
+		await AppSettings.Instance.GALaunchOptions.Save(LaunchOptions.Text);
+
+		// Launch Game
+		var bin = new GABinary(await AppSettings.Instance.GABinaryPath.GetValue(), await AppSettings.Instance.GALaunchOptions.GetValue());
+		bin.Launch();
 	}
 
 	/// <summary>
@@ -123,8 +155,7 @@ public partial class MainPage : ContentPage
 		}
 		GlobalAgendaBinaryLocation.Text = file.FullPath;
 
-		AppSettings.Instance.GABinaryPath.Value = file.FullPath;
-		await AppSettings.Instance.GABinaryPath.Save();
+		await AppSettings.Instance.GABinaryPath.Save(file.FullPath);
     }
 }
 

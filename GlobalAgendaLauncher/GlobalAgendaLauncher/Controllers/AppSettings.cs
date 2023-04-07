@@ -26,6 +26,8 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         public Setting GABinaryPath;
 
+        public Setting GALaunchOptions;
+
         /// <summary>
         /// Internal singleton store.
         /// </summary>
@@ -54,6 +56,7 @@ namespace GlobalAgendaLauncher.Controllers
             Username = new Setting("username");
             Password = new Setting("password", true);
             GABinaryPath = new Setting("global_agenda_binary_location");
+            GALaunchOptions = new Setting("global_agenda_launch_options");
         }
 
         /// <summary>
@@ -64,6 +67,7 @@ namespace GlobalAgendaLauncher.Controllers
             await Username.GetValue();
             await Password.GetValue();
             await GABinaryPath.GetValue();
+            await GALaunchOptions.GetValue();
         }
     }
 
@@ -107,7 +111,7 @@ namespace GlobalAgendaLauncher.Controllers
         /// <summary>
         /// Setting value.
         /// </summary>
-        public string? Value;
+        private string? value;
 
         /// <summary>
         /// Initialize Setting.
@@ -119,7 +123,7 @@ namespace GlobalAgendaLauncher.Controllers
         {
             this.name = name;
             this.secret = secret;
-            this.Value = value;
+            this.value = value;
         }
 
         /// <summary>
@@ -129,32 +133,41 @@ namespace GlobalAgendaLauncher.Controllers
         /// <returns>Setting value.</returns>
         public async Task<string?> GetValue(bool reload=false) { 
             // Check for cached value
-            if (Value is not null && !reload)
+            if (value is not null && !reload)
             {
-                return Value;
+                return value;
             }
 
             // Otherwise load from store
             if (secret)
             {
-                return await SecureStorage.Default.GetAsync(name);
+                value = await SecureStorage.Default.GetAsync(name);
             } else
             {
-                return Preferences.Default.Get<string?>(name, null);
+                value = Preferences.Default.Get<string?>(name, null);
             }
+
+            return value;
         }
 
         /// <summary>
         /// Save value to store.
         /// </summary>
-        public async Task Save()
+        public async Task Save(string? newValue)
         {
+            if (newValue == value)
+            {
+                return;
+            }
+
+            value = newValue;
+
             if (secret)
             {
-                await SecureStorage.Default.SetAsync(name, Value);
+                await SecureStorage.Default.SetAsync(name, value);
             } else
             {
-                Preferences.Default.Set(name, Value);
+                Preferences.Default.Set(name, value);
             }
         }
 
