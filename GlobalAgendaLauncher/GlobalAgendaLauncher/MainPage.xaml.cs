@@ -5,6 +5,8 @@ namespace GlobalAgendaLauncher;
 
 public partial class MainPage : ContentPage
 {
+	private GABinary? bin;
+
     public MainPage()
 	{
 		InitializeComponent();
@@ -118,7 +120,7 @@ public partial class MainPage : ContentPage
 		await AppSettings.Instance.GALaunchOptions.Save(LaunchOptions.Text);
 
 		// Launch Game
-		var bin = new GABinary(await AppSettings.Instance.GABinaryPath.GetValue(), await AppSettings.Instance.GALaunchOptions.GetValue());
+		bin = new GABinary(await AppSettings.Instance.GABinaryPath.GetValue(), await AppSettings.Instance.GALaunchOptions.GetValue());
 		bin.Launch();
 	}
 
@@ -156,6 +158,18 @@ public partial class MainPage : ContentPage
 		GlobalAgendaBinaryLocation.Text = file.FullPath;
 
 		await AppSettings.Instance.GABinaryPath.Save(file.FullPath);
+    }
+
+    private void DebugPress_Clicked(object sender, EventArgs e)
+    {
+		if (bin is null)
+		{
+			Debug.Print("Not running");
+			return;
+		}
+
+		Debug.Print("Clicking");
+		bin.ClickOnLoginUIElement(LoginUIElement.Username);
     }
 }
 

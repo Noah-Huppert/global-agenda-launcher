@@ -125,6 +125,14 @@
                             HorizontalOptions="Start" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
+
+                <VerticalStackLayout>
+                    <Button
+                        x:Name="DebugPress"
+                        Text="DebugPress"
+                        Clicked="DebugPress_Clicked"
+                        />
+                </VerticalStackLayout>
             </HorizontalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
