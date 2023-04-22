@@ -1,6 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using CSharpFunctionalExtensions;
+using GlobalAgendaLauncher.Util;
 
 namespace GlobalAgendaLauncher.Controllers
 {
@@ -13,100 +16,45 @@ namespace GlobalAgendaLauncher.Controllers
 
     public class GABinary
     {
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
+        /// <summary>
+        /// Send an message to a Windows process.
+        /// </summary>
+        /// <param name="hWnd">Windows process handle</param>
+        /// <param name="Msg">Message type code</param>
+        /// <param name="wParam">Argument 1 (depends on message type)</param>
+        /// <param name="lParam">Argument 2 (depends on message type)</param>
+        /// <returns>True if message sent successfully</returns>
         [DllImport("user32.dll")]
         static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, int wParam, int lParam);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetWindowRect(IntPtr hWnd, out Rectangle rect);
+        /// <summary>
+        /// Get the size of a Windows window. Specifically the client area.
+        /// </summary>
+        /// <param name="hWnd">Windows process handle</param>
+        /// <param name="rect">Variable in which size rectangle will be emitted</param>
+        /// <returns>True if successfully got the result, false otherwise</returns>
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetClientRect(IntPtr hWnd, out Rectangle rect);
 
-        [DllImport("user32.dll")]
-        internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("user32.dll")]
-        internal static extern IntPtr SetCapture(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        internal static extern uint SendInput(uint cInputs, INPUT[] pInputs, int cbSize);
-
+        /// <summary>
+        /// Keyboard key down message event code.
+        /// </summary>
         private const uint WM_KEYDOWN = 0x0100;
+        /// <summary>
+        /// Left mouse button down message event code.
+        /// </summary>
         private const uint WM_LBUTTONDOWN = 0x0201;
+        /// <summary>
+        /// Left mouse button up message event code.
+        /// </summary>
         private const uint WM_LBUTTONUP = 0x0202;
-        private const uint WM_SETCURSOR = 0x0020;
-        private const uint WM_CAPTURECHANGED = 0x0215;
 
+        /// <summary>
+        /// Argument to the mouse button down message type indicating that only the left button is clicked.
+        /// </summary>
         private const int MK_LBUTTON = 0x0001;
-        private const int HTCLIENT = 1;
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct INPUT
-        {
-            internal InputType type;
-            internal InputUnion U;
-            internal static int Size
-            {
-                get { return Marshal.SizeOf(typeof(INPUT)); }
-            }
-        }
-
-        public enum InputType : uint
-        {
-            INPUT_MOUSE,
-            INPUT_KEYBOARD,
-            INPUT_HARDWARE
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct MOUSEINPUT
-        {
-            public long dx;
-            public long dy;
-            public uint mouseData;
-            public uint dwFlags;
-            public uint time;
-            public ulong dwExtraInfo;
-        }
-
-        public const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct KEYBDINPUT
-        {
-            ushort wVk;
-            ushort wScan;
-            uint dwFlags;
-            uint time;
-            ulong dwExtraInfo;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct HARDWAREINPUT
-        {
-            uint uMsg;
-            ushort wParamL;
-            ushort wParamH;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        public struct InputUnion
-        {
-            [FieldOffset(0)]
-            internal MOUSEINPUT mi;
-            [FieldOffset(0)]
-            internal KEYBDINPUT ki;
-            [FieldOffset(0)]
-            internal HARDWAREINPUT hi;
-        }
 
 
         /// <summary>
@@ -114,6 +62,9 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         public const string GLOBAL_AGENDA_BINARY_STEAM_PATH = "\"C:\\Users\\conta\\AppData\\Local\\Microsoft\\WindowsApps\\pbrush.exe\"";//"\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Global Agenda Live\\Binaries\\GlobalAgenda.exe\"";
 
+        /// <summary>
+        /// Commonly used options passed to the GA binary which allow it to launch.
+        /// </summary>
         public const string DEFAULT_LAUNCH_OPTIONS = "-host=107.150.130.77 -hostdns=inapatl.globalagendagame.com -seekfreeloading -tcp=300 -log=";
 
         /// <summary>
@@ -121,12 +72,17 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         private string path;
 
+        /// <summary>
+        /// Game binary launch options.
+        /// </summary>
         private string opts;
 
         /// <summary>
         /// System object for running process.
         /// </summary>
-        private System.Diagnostics.Process process;
+        private Process process;
+
+        private bool processRunning = false;
 
         /// <summary>
         /// Initialize.
@@ -138,30 +94,62 @@ namespace GlobalAgendaLauncher.Controllers
             this.opts = opts;
         }
 
+        /// <summary>
+        /// Start the process.
+        /// </summary>
         public void Launch()
         {
-            this.process = System.Diagnostics.Process.Start(path, opts);
+            process = Process.Start(path, opts);
+            processRunning = true;
+            process.Exited += OnProcessExited;
         }
 
-        public void SendText(string text)
+        private void OnProcessExited(object sender, EventArgs e)
+        {
+            processRunning = false;
+        }
+
+        /// <summary>
+        /// Determines if the GA binary is running.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsRunning()
         {
             if (process is null)
+            {
+                return false;
+            }
+
+            return processRunning;
+        }
+
+        /// <summary>
+        /// Send text to the game binary as keyboard inputs.
+        /// </summary>
+        /// <param name="text">The text to send</param>
+        public void SendText(string text)
+        {
+            if (!IsRunning())
             {
                 return;
             }
 
             foreach (char c in text)
             {
-                //SendMessage(process.Id, WM_KEYDOWN, (IntPtr)c, (IntPtr)0);
                 PostMessage(process.MainWindowHandle, WM_KEYDOWN, c, 0);
             }
         }
 
-        public void ClickOnLoginUIElement(LoginUIElement item)
+        /// <summary>
+        /// Click on a specific element on the game login screen.
+        /// </summary>
+        /// <param name="item">The element to click on</param>
+        /// <returns>If successful or failed</returns>
+        public Result<Empty> ClickOnLoginUIElement(LoginUIElement item)
         {
-            if (process is null)
+            if (!IsRunning())
             {
-                return;
+                return Result.Failure<Empty>("Process is not running");
             }
 
             double clickX = 0;
@@ -173,7 +161,7 @@ namespace GlobalAgendaLauncher.Controllers
                 clickY = (double)759 / (double)1080;
             }
 
-            ClickAt(clickX, clickY);
+            return ClickAt(clickX, clickY);
         }
 
         /// <summary>
@@ -181,17 +169,15 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         /// <param name="x">Where to click [0,1] left to right within the window</param>
         /// <param name="y">Where to click [0, 1] top to bottom within the window</param>
-        public void ClickAt(double x, double y)
+        /// <returns>If successful or failed</returns>
+        public Result<Empty> ClickAt(double x, double y)
         {
-            if (process is null)
+            if (!IsRunning())
             {
-                return;
+                return Result.Failure<Empty>("Process is not running");
             }
 
             // Get window size
-            //ShowWindow(this.process.MainWindowHandle, 5);
-            //SetForegroundWindow(this.process.MainWindowHandle);
-
             Rectangle wSize = new Rectangle();
             GetClientRect(this.process.MainWindowHandle, out wSize);
 
@@ -200,6 +186,7 @@ namespace GlobalAgendaLauncher.Controllers
 
             Debug.Print(String.Format("wX={0}, wY={1}", wX, wY));
 
+            // Given window size calcualte the x, y coordinates on which to click
             ushort clickX = (ushort)Math.Round(x * wX);
             ushort clickY = (ushort)Math.Round(y * wY);
 
@@ -207,37 +194,17 @@ namespace GlobalAgendaLauncher.Controllers
 
             Debug.Print(String.Format("x={2}, y={3}, clickX={0}, clickY={1}", clickX, clickY, x, y));
 
-            MOUSEINPUT mouseInput = new MOUSEINPUT();
-            mouseInput.dx = clickX;
-            mouseInput.dy = clickY;
-            mouseInput.mouseData = 0;
-            mouseInput.dwFlags = MOUSEEVENTF_LEFTDOWN;
-            mouseInput.time = 0;
-            mouseInput.dwExtraInfo = 0;
+            // Click
+            if (!PostMessage(process.MainWindowHandle, WM_LBUTTONDOWN, MK_LBUTTON, packedClick))
+            {
+                return Result.Failure<Empty>("Failed to send left mouse button down message");
+            }
+            if (!PostMessage(process.MainWindowHandle, WM_LBUTTONUP, MK_LBUTTON, packedClick))
+            {
+                return Result.Failure<Empty>("Failed to send left mouse button up message");
+            }
 
-            InputUnion inputUnion = new InputUnion();
-            inputUnion.mi = mouseInput;
-
-            INPUT[] inputs = new INPUT[1];
-            inputs[0].type = InputType.INPUT_MOUSE;
-            inputs[0].U = inputUnion;
-
-            //SendInput(1, inputs, INPUT.Size);
-
-            //SetCapture(process.MainWindowHandle);
-
-
-            var hwnd = ((MauiWinUIWindow)App.Current.Windows[0].Handler.PlatformView).WindowHandle;
-
-            // var hwnd = ((MauiWinUIWindow)App.Current.Windows[0].Handler.NativeView).WindowHandle;
-
-
-            PostMessage(hwnd, WM_SETCURSOR, (int)process.MainWindowHandle, ((ushort)WM_LBUTTONDOWN << 16) | (ushort)HTCLIENT);
-            PostMessage(hwnd, WM_CAPTURECHANGED, 0, (int)process.MainWindowHandle);
-            //var proccessedDown = PostMessage(process.MainWindowHandle, WM_LBUTTONDOWN, MK_LBUTTON, packedClick);
-            //var proccessedUp = PostMessage(process.MainWindowHandle, WM_LBUTTONUP, MK_LBUTTON, packedClick);
-
-            //Debug.Print(String.Format("down={0}, up={1}", proccessedDown, proccessedUp));
+            return Result.Success<Empty>(Empty.AnEmpty);
         }
 
         /// <summary>
