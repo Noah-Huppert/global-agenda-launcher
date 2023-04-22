@@ -32,6 +32,11 @@ namespace GABinaryClient
         /// </summary>
         private const int MK_LBUTTON = 0x0001;
 
+        public static void Nothing(Int32 n)
+        {
+
+        }
+
         /// <summary>
         /// Click on a specific coordinate in the process.
         /// (0, 0) is top left.

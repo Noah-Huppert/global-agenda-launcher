@@ -40,6 +40,12 @@ namespace GlobalAgendaLauncher.Controllers
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetClientRect(IntPtr hWnd, out Rectangle rect);
 
+        [DllImport("user32.dll")]
+        internal static extern IntPtr SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
         /// <summary>
         /// Keyboard key down message event code.
         /// </summary>
@@ -69,7 +75,7 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         public const string DEFAULT_LAUNCH_OPTIONS = "-host=107.150.130.77 -hostdns=inapatl.globalagendagame.com -seekfreeloading -tcp=300 -log=";
 
-        private const string CLIENT_DLL = "C:\\Users\\conta\\Documents\\Code\\games\\global-agenda-launcher\\GlobalAgendaLauncher\\GABinaryClient\\bin\\x86\\Debug\\net7.0\\GABinaryClient.dll";
+        private const string CLIENT_DLL = "C:\\Users\\conta\\Documents\\Code\\games\\global-agenda-launcher\\GlobalAgendaLauncher\\GABinaryClientFramework\\bin\\Debug\\GABinaryClientFramework.dll";//"C:\\Users\\conta\\Documents\\Code\\games\\global-agenda-launcher\\GlobalAgendaLauncher\\GABinaryClient\\bin\\x86\\Debug\\net7.0\\GABinaryClient.dll";
 
         /// <summary>
         /// The location of the game binary.
@@ -280,8 +286,9 @@ namespace GlobalAgendaLauncher.Controllers
             Debug.Print(String.Format("x={2}, y={3}, clickX={0}, clickY={1}", clickX, clickY, x, y));
 
             // Click
-            var res = injector.CallFunction(CLIENT_DLL, "GABinaryClient.GABinaryClient.ClickAt", new CoordinatesArg
-            {
+            //ShowWindow(this.process.MainWindowHandle, 5);
+            //SetForegroundWindow(this.process.MainWindowHandle);
+            var res = injector.CallFunction(CLIENT_DLL, "ClickAt", new CoordinatesArg{
                 x = clickX,
                 y = clickY,
             });
