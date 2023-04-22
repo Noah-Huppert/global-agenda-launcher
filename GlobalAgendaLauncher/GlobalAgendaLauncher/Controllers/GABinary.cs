@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using CSharpFunctionalExtensions;
 using GlobalAgendaLauncher.Util;
+using Reloaded.Injector;
 
 namespace GlobalAgendaLauncher.Controllers
 {
@@ -67,6 +69,8 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         public const string DEFAULT_LAUNCH_OPTIONS = "-host=107.150.130.77 -hostdns=inapatl.globalagendagame.com -seekfreeloading -tcp=300 -log=";
 
+        private const string CLIENT_DLL = "C:\\Users\\conta\\Documents\\Code\\games\\global-agenda-launcher\\GlobalAgendaLauncher\\GABinaryClient\\bin\\x86\\Debug\\net7.0\\GABinaryClient.dll";
+
         /// <summary>
         /// The location of the game binary.
         /// </summary>
@@ -82,7 +86,21 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         private Process process;
 
+        /// <summary>
+        /// Client used to inject DLLs and call functions.
+        /// </summary>
+        private Injector? injector;
+
+        /// <summary>
+        /// Internal tracker of if process is running. Set to true and false based on process events.
+        /// </summary>
         private bool processRunning = false;
+
+        private struct CoordinatesArg
+        {
+            public ushort x;
+            public ushort y;
+        }
 
         /// <summary>
         /// Initialize.
@@ -97,16 +115,66 @@ namespace GlobalAgendaLauncher.Controllers
         /// <summary>
         /// Start the process.
         /// </summary>
-        public void Launch()
+        public Result<Empty> Launch()
         {
+            // Start game binary
             process = Process.Start(path, opts);
             processRunning = true;
             process.Exited += OnProcessExited;
+
+            return Result.Success<Empty>(Empty.AnEmpty);
         }
 
+        private Result<Empty> Inject()
+        {
+            injector = new Injector(process);
+            var injectRes = injector.Inject(CLIENT_DLL);
+
+            if (injectRes == 0)
+            {
+                return Result.Failure<Empty>("Failed to inject client into game");
+            }
+
+            return Result.Success<Empty>(Empty.AnEmpty);
+        }
+
+        public void Stop()
+        {
+            process.Kill();
+            processRunning = false;
+        }
+
+        /// <summary>
+        /// Complete the login process with a running game.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public Result<Empty> Login(string username, string password)
+        {
+            if (!IsRunning())
+            {
+                return Result.Failure<Empty>("Process is not running");
+            }
+
+            var injectRes = Inject();
+            if (injectRes.IsFailure)
+            {
+                return Result.Failure<Empty>(injectRes.Error);
+            }
+
+            return ClickOnLoginUIElement(LoginUIElement.Username);
+        }
+
+        /// <summary>
+        /// Event handler for when process exits.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnProcessExited(object sender, EventArgs e)
         {
             processRunning = false;
+            injector = null;
         }
 
         /// <summary>
@@ -124,20 +192,34 @@ namespace GlobalAgendaLauncher.Controllers
         }
 
         /// <summary>
+        /// Determines if the game binary client is injected and ready for use.
+        /// </summary>
+        /// <returns>True if injected, false if not.</returns>
+        private bool IsClientInjected()
+        {
+            return injector is not null;
+        }
+
+        /// <summary>
         /// Send text to the game binary as keyboard inputs.
         /// </summary>
         /// <param name="text">The text to send</param>
-        public void SendText(string text)
+        private Result<Empty> SendText(string text)
         {
             if (!IsRunning())
             {
-                return;
+                return Result.Failure<Empty>("Process isn't running");
             }
 
             foreach (char c in text)
             {
-                PostMessage(process.MainWindowHandle, WM_KEYDOWN, c, 0);
+                if (!PostMessage(process.MainWindowHandle, WM_KEYDOWN, c, 0))
+                {
+                    return Result.Failure<Empty>("Failed to send character code");
+                }
             }
+
+            return Result.Success<Empty>(Empty.AnEmpty);
         }
 
         /// <summary>
@@ -145,7 +227,7 @@ namespace GlobalAgendaLauncher.Controllers
         /// </summary>
         /// <param name="item">The element to click on</param>
         /// <returns>If successful or failed</returns>
-        public Result<Empty> ClickOnLoginUIElement(LoginUIElement item)
+        private Result<Empty> ClickOnLoginUIElement(LoginUIElement item)
         {
             if (!IsRunning())
             {
@@ -170,11 +252,16 @@ namespace GlobalAgendaLauncher.Controllers
         /// <param name="x">Where to click [0,1] left to right within the window</param>
         /// <param name="y">Where to click [0, 1] top to bottom within the window</param>
         /// <returns>If successful or failed</returns>
-        public Result<Empty> ClickAt(double x, double y)
+        private Result<Empty> ClickAt(double x, double y)
         {
             if (!IsRunning())
             {
                 return Result.Failure<Empty>("Process is not running");
+            }
+
+            if (!IsClientInjected())
+            {
+                return Result.Failure<Empty>("Client is not injected");
             }
 
             // Get window size
@@ -190,19 +277,15 @@ namespace GlobalAgendaLauncher.Controllers
             ushort clickX = (ushort)Math.Round(x * wX);
             ushort clickY = (ushort)Math.Round(y * wY);
 
-            var packedClick = (clickY << 16) | clickX;
-
             Debug.Print(String.Format("x={2}, y={3}, clickX={0}, clickY={1}", clickX, clickY, x, y));
 
             // Click
-            if (!PostMessage(process.MainWindowHandle, WM_LBUTTONDOWN, MK_LBUTTON, packedClick))
+            var res = injector.CallFunction(CLIENT_DLL, "GABinaryClient.GABinaryClient.ClickAt", new CoordinatesArg
             {
-                return Result.Failure<Empty>("Failed to send left mouse button down message");
-            }
-            if (!PostMessage(process.MainWindowHandle, WM_LBUTTONUP, MK_LBUTTON, packedClick))
-            {
-                return Result.Failure<Empty>("Failed to send left mouse button up message");
-            }
+                x = clickX,
+                y = clickY,
+            });
+            Debug.Print(String.Format("Call ClickAt={0}", res));
 
             return Result.Success<Empty>(Empty.AnEmpty);
         }

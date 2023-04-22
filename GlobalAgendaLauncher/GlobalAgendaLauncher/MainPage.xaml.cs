@@ -121,7 +121,12 @@ public partial class MainPage : ContentPage
 
 		// Launch Game
 		bin = new GABinary(await AppSettings.Instance.GABinaryPath.GetValue(), await AppSettings.Instance.GALaunchOptions.GetValue());
-		bin.Launch();
+		var launchRes = bin.Launch();
+		if (launchRes.IsFailure)
+		{
+            bin.Stop();
+            await DisplayAlert("Failed to Launch Game", launchRes.Error, "Okay");
+		}
 	}
 
 	/// <summary>
@@ -160,7 +165,7 @@ public partial class MainPage : ContentPage
 		await AppSettings.Instance.GABinaryPath.Save(file.FullPath);
     }
 
-    private void DebugPress_Clicked(object sender, EventArgs e)
+    private async void DebugPress_Clicked(object sender, EventArgs e)
     {
 		if (bin is null)
 		{
@@ -169,7 +174,11 @@ public partial class MainPage : ContentPage
 		}
 
 		Debug.Print("Clicking");
-		bin.ClickOnLoginUIElement(LoginUIElement.Username);
+		var loginRes = bin.Login(Username.Text, Password.Text);
+		if (loginRes.IsFailure)
+		{
+			await DisplayAlert("Failed to Login", loginRes.Error, "Okay");
+		}
     }
 }
 
